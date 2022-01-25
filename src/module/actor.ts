@@ -1,3 +1,4 @@
+import { Tesseract } from 'tesseract.ts';
 import { actorToFifth, featureCollectionToItems } from './actors.convert';
 import { textToActor } from './actors.process';
 import { UserData } from './importForm';
@@ -28,6 +29,22 @@ async function txtRoute(stringData: string) {
   );
 }
 
+async function processOCR(file: Blob) {
+  const { text } = await Tesseract.recognize(file);
+  return text;
+}
+
+/* const worker = Tesseract.createWorker();
+async function processOCR(file: Blob) {
+  await worker.loadLanguage('eng');
+  await worker.initialize('eng');
+  const {
+    data: { text },
+  } = await worker.recognize(file);
+  await worker.terminate();
+  return text;
+} */
+
 export async function processActorInput({ jsonfile, clipboardInput }: UserData) {
   if (clipboardInput) {
     console.log(`Clipboard input: ${clipboardInput}`);
@@ -39,11 +56,15 @@ export async function processActorInput({ jsonfile, clipboardInput }: UserData) 
     console.log(`Error reading ${jsonfile}`);
     return;
   }
-  const data = await response.text();
-  console.log(`Data: ${data}`);
+  const data = await response.blob();
 
   const ext = jsonfile.split('.').pop();
   switch (ext) {
+    case 'png':
+      console.log(`hanlding png`);
+      const text = await processOCR(data);
+      txtRoute(text);
+      break;
     default:
       console.log(`Unknown file type ${ext}`);
   }
