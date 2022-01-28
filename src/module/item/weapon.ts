@@ -57,13 +57,13 @@ interface Range {
 }
 export function getRange(description: string): Range | undefined {
   if (description.includes('reach')) {
-    const value = parseInt(description.split('reach')[1].split(' ')[0]);
-    return { value };
+    const value = parseInt(description.split('reach')[1].trim().split(' ')[0]);
+    return { value, units: 'ft' };
   }
   if (description.includes('range')) {
-    const rangeStr = description.split('range')[1].split(' ')[0];
+    const rangeStr = description.split('range')[1].trim().split(' ')[0];
     const [value, long] = rangeStr.split('/').map((str) => parseInt(str));
-    return { value, long };
+    return { value, long, units: 'ft' };
   }
   if (/cone/i.test(description)) {
     return { units: 'self' };

@@ -45,4 +45,12 @@ describe('getRange', () => {
     expect(range).toBeDefined();
     expect(range?.value).toEqual(50);
   });
+
+  it('should get the range of a Shortsword', () => {
+    const text =
+      'Shortsword. Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 6 (1d6 + 3) piercing damage plus 13 (3d8) poison damage.';
+    const range = getRange(text);
+    expect(range).toBeDefined();
+    expect(range?.value).toEqual(5);
+  });
 });
