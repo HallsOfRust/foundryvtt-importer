@@ -42,7 +42,7 @@ export class importJSONForm extends FormApplication {
       width: 400,
       top: window.innerHeight - window.innerHeight + 20,
       left: window.innerWidth - 710,
-      template: `modules/${CONSTANTS.module.name}/templates/importForm.hbs`,
+      template: `modules/${CONSTANTS.module.name}/templates/importJournalForm.hbs`,
     });
   }
 }

@@ -1,6 +1,6 @@
 import { Config, registerSettings } from './settings';
 import { preloadTemplates } from './preloadTemplates';
-import { processInputJSON } from './journal';
+import { processInputJSON } from './journal/input';
 import { processTableJSON } from './table';
 import { renderSidebarButtons } from './renderSidebarButtons';
 import CONSTANTS from './constants';

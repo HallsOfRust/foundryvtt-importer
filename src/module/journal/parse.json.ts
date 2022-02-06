@@ -1,13 +1,12 @@
-import { cleanName } from './formatters';
-import { UserData } from './importForm';
-import { Config } from './settings';
+import { cleanName } from '../formatters';
+import { Config } from '../settings';
 
-interface Note {
+export interface Note {
   value: string;
   tag: string;
 }
 
-interface JournalNode {
+export interface JournalNode {
   value: string;
   tag: string;
   notes: Array<Note>;
@@ -15,7 +14,7 @@ interface JournalNode {
   sortValue?: number;
 }
 
-function getRootName(jsonfile: string) {
+export function getRootName(jsonfile: string) {
   // get file name from full path
   const fileName = jsonfile.split('/').pop() || jsonfile;
   // remove extension
@@ -140,7 +139,7 @@ async function createFoldersRecursive(
   }
 }
 
-async function journalFromJson(name: string, data: JournalNode[]) {
+export async function journalFromJson(name: string, data: JournalNode[]) {
   const folder = await Folder.create({
     name: cleanName(name),
     type: 'JournalEntry',
@@ -157,16 +156,4 @@ async function journalFromJson(name: string, data: JournalNode[]) {
     });
     console.log(`Finished generating ${name} Journals...`);
   }
-}
-
-export async function processInputJSON({ jsonfile }: UserData) {
-  const response = await fetch(jsonfile);
-  if (!response.ok) {
-    console.log(`Error reading ${jsonfile}`);
-    return;
-  }
-  const data = await response.text();
-  const json = JSON.parse(data) as JournalNode[];
-  const name = getRootName(jsonfile);
-  journalFromJson(name, json);
 }
