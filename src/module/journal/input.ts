@@ -1,11 +1,27 @@
 import { UserData } from '../importForm';
-import { buildJournal } from './build';
 import { getRootName, journalFromJson, JournalNode } from './parse.json';
-import { buildStructure } from './process';
+import { parseToJournal } from './process';
+
+function forEachJournal(root: JournalNode, callback: (journal: JournalNode) => void) {
+  callback(root);
+  root.children.forEach((child) => forEachJournal(child, callback));
+}
+
+function removeCircular(rootJournal: JournalNode) {
+  forEachJournal(rootJournal, (journal) => {
+    journal.notes = journal.notes.map((note) => {
+      note.parent = undefined;
+      return note;
+    });
+    journal.parent = undefined;
+  });
+}
 
 async function txtRoute(input: string) {
-  const rootJournal = buildStructure(input);
-  await buildJournal(rootJournal);
+  const rootJournal = parseToJournal(input);
+  removeCircular(rootJournal);
+  console.log(`Journal: ${JSON.stringify(rootJournal, null, 2)}`);
+  journalFromJson(rootJournal.value, rootJournal.children);
 }
 
 export async function processInputJSON({ jsonfile, clipboardInput }: UserData) {

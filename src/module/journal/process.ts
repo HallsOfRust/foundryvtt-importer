@@ -1,3 +1,5 @@
+import { JournalNode } from './parse.json';
+
 export interface ImportFolder {
   name: string;
   entries?: Entry[];
@@ -80,6 +82,80 @@ export function buildStructure(input: string): ImportFolder {
   return rootFolder;
 }
 
-export function parseJournal(input: string): ImportFolder {
-  throw new Error('Not implemented');
+function buildHeader(currentDepth: number): string {
+  return `h${currentDepth}`;
+}
+
+export function isNewStructure(lines: string[], index: number): boolean {
+  const remaining = lines.slice(index);
+  if (remaining.length < 2) {
+    return false;
+  }
+  if (isFolderLine(remaining[0]) && isFolderLine(remaining[1])) {
+    return true;
+  }
+  return false;
+}
+
+export function isUpOne(lines: string[], index: number): boolean {
+  const remaining = lines.slice(index);
+  if (remaining.length < 2) {
+    return false;
+  }
+  if (isFolderLine(remaining[0]) && isFolderLine(remaining[1])) {
+    return false;
+  }
+  if (isFolderLine(remaining[0]) && !isFolderLine(remaining[1])) {
+    return true;
+  }
+  return false;
+}
+
+export function parseToJournal(input: string): JournalNode {
+  const first = input.split('\n');
+  let lines = first.splice(1);
+  lines = lines.filter((line) => line !== '');
+  let currentDepth = 1;
+  const rootFolder: JournalNode = {
+    value: first[0],
+    tag: buildHeader(currentDepth),
+    notes: [],
+    children: [],
+  };
+  let currentFolder: JournalNode = rootFolder;
+
+  lines.forEach((line, index) => {
+    currentDepth++;
+    if (isFolderLine(line)) {
+      const nextFolder = {
+        value: line,
+        tag: buildHeader(currentDepth + 1),
+        notes: [],
+        children: [],
+        parent: currentFolder,
+      };
+      currentFolder.children.push(nextFolder);
+      currentFolder = nextFolder;
+    } else {
+      const newNote = {
+        value: line,
+        tag: 'p',
+        parent: currentFolder,
+      };
+      currentFolder.notes.push(newNote);
+      // prep next line processing
+      const nextLineIndex = index + 1;
+      // move up one if we are moving on to a new section
+      if (isUpOne(lines, nextLineIndex)) {
+        currentDepth--;
+        if (currentFolder.parent) {
+          currentFolder = currentFolder.parent;
+        }
+      } else if (isNewStructure(lines, nextLineIndex)) {
+        currentDepth = 0;
+        currentFolder = rootFolder;
+      }
+    }
+  });
+  return rootFolder;
 }

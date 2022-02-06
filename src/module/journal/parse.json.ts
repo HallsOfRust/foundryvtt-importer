@@ -4,6 +4,7 @@ import { Config } from '../settings';
 export interface Note {
   value: string;
   tag: string;
+  parent?: JournalNode;
 }
 
 export interface JournalNode {
@@ -11,6 +12,7 @@ export interface JournalNode {
   tag: string;
   notes: Array<Note>;
   children: Array<JournalNode>;
+  parent?: JournalNode;
   sortValue?: number;
 }
 
@@ -37,6 +39,18 @@ const formatList = (note: string) => {
       return `<li>${listItem}</li>`;
     });
     return `${prepend}<ol>${asList.join('')}</ol>`;
+  }
+
+  if (note.includes('•')) {
+    const splitNote = note.split(/•/);
+    if (note[0] !== '•') {
+      prepend = splitNote[0];
+      splitNote.shift();
+    }
+    const asList = splitNote.map((listItem: string) => {
+      return `<li>${listItem}</li>`;
+    });
+    return `<ul>${asList.join('')}</ul>`;
   }
   return `${note}`;
 };
@@ -105,14 +119,16 @@ async function createFoldersRecursive(
   let htmlNote = finalNotes.reduce((note: string, htmlNote: string) => {
     return `${htmlNote}${note}`;
   }, ``);
-  htmlNote = `<div>${htmlNote}</div>`;
-  await JournalEntry.create({
-    name: `${cleanName(name)}`,
-    content: htmlNote,
-    collectionName: node.value,
-    folder: folder?.data?._id,
-    sort: node.sortValue ?? 0,
-  });
+  if (htmlNote.length > 0 && htmlNote !== '') {
+    htmlNote = `<div>${htmlNote}</div>`;
+    await JournalEntry.create({
+      name: `${cleanName(name)}`,
+      content: htmlNote,
+      collectionName: node.value,
+      folder: folder?.data?._id,
+      sort: node.sortValue ?? 0,
+    });
+  }
 
   function getSortValue(title: string) {
     // if first two characters are a number, extract the number
