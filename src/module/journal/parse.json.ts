@@ -56,8 +56,7 @@ const formatList = (note: string) => {
 };
 
 export function notesToHTMLNote(notes: Note[]): string {
-  const reduced = notes.reduce(mergeParagraphs, []);
-  const values = reduced.map(normalizeHeaders);
+  const values = notes.map(normalizeHeaders);
   const finalNotes = values.map(noteMaps);
   return finalNotes.reduce((note: string, htmlNote: string) => {
     return `${note}${htmlNote}`;
@@ -77,24 +76,6 @@ function normalizeHeaders(note: Note) {
 
 const noteMaps = (note: string) => {
   return formatList(note);
-};
-
-const mergeParagraphs = (noteList: Note[], current: Note) => {
-  if (current.tag !== 'p') {
-    noteList.push(current);
-    return noteList;
-  }
-  if (noteList.length === 0) {
-    noteList.push(current);
-    return noteList;
-  }
-
-  if (noteList[noteList.length - 1].tag === 'p') {
-    noteList[noteList.length - 1].value += ` ${current.value}`;
-  } else {
-    noteList.push(current);
-  }
-  return noteList;
 };
 
 async function createFoldersRecursive(

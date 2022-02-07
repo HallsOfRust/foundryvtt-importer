@@ -111,12 +111,16 @@ export function isUpOne(lines: string[], index: number): boolean {
   return false;
 }
 
-function getNoteTag(line: string) {
+function getNoteTag(line: string, currentDepth: number, maxDepth: number): string {
   if (line.includes('•')) return 'lu';
+  if (currentDepth !== maxDepth && isFolderLine(line)) {
+    return `h${currentDepth}`;
+  }
   return 'p';
 }
 
 export function parseToJournal(input: string): JournalNode {
+  const maxDepth = guessDepth(input);
   const first = input.split('\n');
   let lines = first.splice(1);
   lines = lines.filter((line) => line !== '');
@@ -131,7 +135,7 @@ export function parseToJournal(input: string): JournalNode {
 
   lines.forEach((line, index) => {
     currentDepth++;
-    if (isFolderLine(line)) {
+    if (isFolderLine(line) && currentDepth < maxDepth - 1) {
       const nextFolder = {
         value: line,
         tag: buildHeader(currentDepth + 1),
@@ -144,7 +148,7 @@ export function parseToJournal(input: string): JournalNode {
     } else {
       const newNote = {
         value: line,
-        tag: getNoteTag(line),
+        tag: getNoteTag(line, currentDepth, maxDepth),
         parent: currentFolder,
       };
       currentFolder.notes.push(newNote);
@@ -153,9 +157,6 @@ export function parseToJournal(input: string): JournalNode {
       // move up one if we are moving on to a new section
       if (isUpOne(lines, nextLineIndex)) {
         currentDepth--;
-        if (currentFolder.parent) {
-          currentFolder = currentFolder.parent;
-        }
       } else if (isNewStructure(lines, nextLineIndex)) {
         currentDepth = 0;
         currentFolder = rootFolder;
