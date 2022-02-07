@@ -21,7 +21,7 @@ async function txtRoute(input: string) {
   const rootJournal = parseToJournal(input);
   removeCircular(rootJournal);
   console.log(`Journal: ${JSON.stringify(rootJournal, null, 2)}`);
-  journalFromJson(rootJournal.value, [rootJournal]);
+  journalFromJson([rootJournal]);
 }
 
 export async function processInputJSON({ jsonfile, clipboardInput }: UserData) {
@@ -38,5 +38,5 @@ export async function processInputJSON({ jsonfile, clipboardInput }: UserData) {
   const data = await response.text();
   const json = JSON.parse(data) as JournalNode[];
   const name = getRootName(jsonfile);
-  journalFromJson(name, json);
+  journalFromJson(json, name);
 }

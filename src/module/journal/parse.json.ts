@@ -135,8 +135,8 @@ async function createFoldersRecursive(
   }
 }
 
-export async function foldjournalFromJson(name?: string, data: JournalNode[]) {
-  let folder;
+export async function journalFromJson(data: JournalNode[], name?: string) {
+  let folder: StoredDocument<Folder> | undefined = undefined;
   if (name) {
     folder = await Folder.create({
       name: cleanName(name),

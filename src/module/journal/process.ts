@@ -135,7 +135,7 @@ export function parseToJournal(input: string): JournalNode {
 
   lines.forEach((line, index) => {
     currentDepth++;
-    if (isFolderLine(line) && currentDepth < maxDepth - 1) {
+    if (isFolderLine(line) && currentDepth < maxDepth) {
       const nextFolder = {
         value: line,
         tag: buildHeader(currentDepth + 1),
