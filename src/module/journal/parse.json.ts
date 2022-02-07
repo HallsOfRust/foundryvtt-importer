@@ -78,6 +78,21 @@ const noteMaps = (note: string) => {
   return formatList(note);
 };
 
+function getSortValue(title: string) {
+  // if first two characters are a number, extract the number
+  const firstTwo = title.substring(0, 2);
+  if (firstTwo.match(/^\d+$/)) {
+    return parseInt(firstTwo, 10);
+  }
+  // if the first character is a number, extract the number
+  const first = title.substring(0, 1);
+  if (first.match(/^\d+$/)) {
+    return parseInt(first, 10);
+  }
+  // otherwise, return the ascii value of the first characters
+  return first.charCodeAt(0);
+}
+
 async function createFoldersRecursive(
   node: JournalNode,
   rootFolder: StoredDocument<Folder>,
@@ -108,21 +123,6 @@ async function createFoldersRecursive(
       folder: folder?.data?._id,
       sort: node.sortValue ?? 0,
     });
-  }
-
-  function getSortValue(title: string) {
-    // if first two characters are a number, extract the number
-    const firstTwo = title.substring(0, 2);
-    if (firstTwo.match(/^\d+$/)) {
-      return parseInt(firstTwo, 10);
-    }
-    // if the first character is a number, extract the number
-    const first = title.substring(0, 1);
-    if (first.match(/^\d+$/)) {
-      return parseInt(first, 10);
-    }
-    // otherwise, return the ascii value of the first characters
-    return first.charCodeAt(0);
   }
 
   if (node.children) {
