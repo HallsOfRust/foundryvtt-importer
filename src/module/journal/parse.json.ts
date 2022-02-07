@@ -95,15 +95,15 @@ function getSortValue(title: string) {
 
 async function createFoldersRecursive(
   node: JournalNode,
-  rootFolder: StoredDocument<Folder>,
+  rootFolder: StoredDocument<Folder> | undefined,
   currentFolder: StoredDocument<Folder> | undefined,
   currentDepth = 1,
   settings: Config,
 ) {
-  let folder: StoredDocument<Folder> = currentFolder ?? rootFolder;
+  let folder: StoredDocument<Folder> | undefined = currentFolder ?? rootFolder;
 
   if (node.children.length > 0 && currentDepth < settings.folderDepth) {
-    const current_id = currentFolder?.data?._id ?? rootFolder.data._id;
+    const current_id = currentFolder?.data?._id ?? rootFolder?.data._id ?? undefined;
     folder =
       (await Folder.create({
         name: cleanName(node.value),
@@ -135,21 +135,19 @@ async function createFoldersRecursive(
   }
 }
 
-export async function journalFromJson(name: string, data: JournalNode[]) {
-  const folder = await Folder.create({
-    name: cleanName(name),
-    type: 'JournalEntry',
-    sorting: 'm',
-  });
-  if (!folder) {
-    console.log(`Error creating folder ${name}`);
-    return;
-  } else {
-    const settings = Config._load();
-    console.log(`Building journals with a depth of ${settings.folderDepth}`);
-    data.forEach(async (section: JournalNode) => {
-      await createFoldersRecursive(section, folder, undefined, 1, settings);
+export async function foldjournalFromJson(name?: string, data: JournalNode[]) {
+  let folder;
+  if (name) {
+    folder = await Folder.create({
+      name: cleanName(name),
+      type: 'JournalEntry',
+      sorting: 'm',
     });
-    console.log(`Finished generating ${name} Journals...`);
   }
+  const settings = Config._load();
+  console.log(`Building journals with a depth of ${settings.folderDepth}`);
+  data.forEach(async (section: JournalNode) => {
+    await createFoldersRecursive(section, folder, undefined, 1, settings);
+  });
+  console.log(`Finished generating ${name} Journals...`);
 }
