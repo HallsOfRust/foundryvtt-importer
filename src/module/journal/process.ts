@@ -111,6 +111,11 @@ export function isUpOne(lines: string[], index: number): boolean {
   return false;
 }
 
+function getNoteTag(line: string) {
+  if (line.includes('•')) return 'lu';
+  return 'p';
+}
+
 export function parseToJournal(input: string): JournalNode {
   const first = input.split('\n');
   let lines = first.splice(1);
@@ -139,7 +144,7 @@ export function parseToJournal(input: string): JournalNode {
     } else {
       const newNote = {
         value: line,
-        tag: 'p',
+        tag: getNoteTag(line),
         parent: currentFolder,
       };
       currentFolder.notes.push(newNote);

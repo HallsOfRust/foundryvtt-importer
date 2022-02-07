@@ -36,7 +36,7 @@ const formatList = (note: string) => {
       splitNote.shift();
     }
     const asList = splitNote.map((listItem: string) => {
-      return `<li>${listItem}</li>`;
+      return `<li>${listItem.trim()}</li>`;
     });
     return `${prepend}<ol>${asList.join('')}</ol>`;
   }
@@ -48,12 +48,21 @@ const formatList = (note: string) => {
       splitNote.shift();
     }
     const asList = splitNote.map((listItem: string) => {
-      return `<li>${listItem}</li>`;
+      return `<li>${listItem.trim()}</li>`;
     });
     return `<ul>${asList.join('')}</ul>`;
   }
   return `${note}`;
 };
+
+export function notesToHTMLNote(notes: Note[]): string {
+  const reduced = notes.reduce(mergeParagraphs, []);
+  const values = reduced.map(normalizeHeaders);
+  const finalNotes = values.map(noteMaps);
+  return finalNotes.reduce((note: string, htmlNote: string) => {
+    return `${note}${htmlNote}`;
+  }, ``);
+}
 
 function normalizeHeaders(note: Note) {
   if (note.tag.includes('h')) {
@@ -62,7 +71,8 @@ function normalizeHeaders(note: Note) {
     }
   }
   const tag = note.tag.includes('h') ? 'h2' : note.tag;
-  return `<${tag}>${note.value}</${tag}>`;
+  const value = note.value.trim();
+  return `<${tag}>${value}</${tag}>`;
 }
 
 const noteMaps = (note: string) => {
@@ -87,7 +97,6 @@ const mergeParagraphs = (noteList: Note[], current: Note) => {
   return noteList;
 };
 
-const collission_tracker: Record<string, number> = {};
 async function createFoldersRecursive(
   node: JournalNode,
   rootFolder: StoredDocument<Folder>,
@@ -96,33 +105,23 @@ async function createFoldersRecursive(
   settings: Config,
 ) {
   let folder: StoredDocument<Folder> = currentFolder ?? rootFolder;
-  // if node.value in collission_tracker, then we have a collision
-  collission_tracker[node.value] = collission_tracker[node.value] ?? 0;
-  collission_tracker[node.value]++;
-  const name = `${node.value}`;
 
   if (node.children.length > 0 && currentDepth < settings.folderDepth) {
     const current_id = currentFolder?.data?._id ?? rootFolder.data._id;
     folder =
       (await Folder.create({
-        name: cleanName(name),
+        name: cleanName(node.value),
         type: 'JournalEntry',
         parent: current_id,
         sorting: 'm',
       })) ?? rootFolder;
     currentDepth++;
   }
-  const notes = node.notes.reverse();
-  const reduced = notes.reduce(mergeParagraphs, []);
-  const values = reduced.map(normalizeHeaders);
-  const finalNotes = values.map(noteMaps);
-  let htmlNote = finalNotes.reduce((note: string, htmlNote: string) => {
-    return `${htmlNote}${note}`;
-  }, ``);
+  let htmlNote = notesToHTMLNote(node.notes);
   if (htmlNote.length > 0 && htmlNote !== '') {
     htmlNote = `<div>${htmlNote}</div>`;
     await JournalEntry.create({
-      name: `${cleanName(name)}`,
+      name: `${cleanName(node.value)}`,
       content: htmlNote,
       collectionName: node.value,
       folder: folder?.data?._id,
