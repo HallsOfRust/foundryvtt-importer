@@ -11,8 +11,14 @@ export interface Entry {
   content: string;
 }
 
-function isFolderLine(line: string): boolean {
-  return line.split(' ').length < 7;
+export function isFolderLine(line: string, names?: string[]): boolean {
+  if (!line) return false;
+  if (names) {
+    return names.find((name) => name === line) !== undefined;
+  }
+  const shortEnough = line.split(' ').length < 7;
+  const hasBullet = line.includes('•');
+  return shortEnough && !hasBullet;
 }
 
 export function guessDepth(input: string): number {
@@ -22,14 +28,14 @@ export function guessDepth(input: string): number {
   lines.forEach((line) => {
     if (isFolderLine(line)) {
       currentDepth++;
-    } else {
       if (currentDepth > maxDepth) {
         maxDepth = currentDepth;
       }
+    } else {
       currentDepth = 0;
     }
   });
-  return maxDepth;
+  return maxDepth < 3 ? maxDepth : 3;
 }
 
 export function buildStructure(input: string): ImportFolder {
@@ -97,6 +103,10 @@ export function isNewStructure(lines: string[], index: number): boolean {
   return false;
 }
 
+export function getNames(input: string): string[] {
+  return [...input.split('\n\n').map((line) => line.split('\n')[0])];
+}
+
 export function isUpOne(lines: string[], index: number): boolean {
   const remaining = lines.slice(index);
   if (remaining.length < 2) {
@@ -119,49 +129,77 @@ function getNoteTag(line: string, currentDepth: number, maxDepth: number): strin
   return 'p';
 }
 
-export function parseToJournal(input: string): JournalNode {
-  const maxDepth = guessDepth(input);
-  const first = input.split('\n');
-  let lines = first.splice(1);
-  lines = lines.filter((line) => line !== '');
-  let currentDepth = 1;
-  const rootFolder: JournalNode = {
-    value: first[0],
-    tag: buildHeader(currentDepth),
+function newEntry(title: string, sortValue: number): JournalNode {
+  return {
+    value: title,
+    tag: 'h2',
+    notes: [],
+    children: [],
+    sortValue,
+  };
+}
+
+function validTitle(lines: string[], index: number): boolean {
+  if (lines.length <= index + 1) {
+    return false;
+  }
+  const noTilesBorder =
+    isFolderLine(lines[index]) && !isFolderLine(lines[index + 1]) && !isFolderLine(lines[index - 1]);
+  const followedByBullet = lines[index + 1].includes('•');
+  return noTilesBorder && !followedByBullet;
+}
+
+export function parseToJournalV2(input: string): JournalNode {
+  const rootNode: JournalNode = {
+    value: 'Parsed Journal',
+    tag: 'h1',
     notes: [],
     children: [],
   };
-  let currentFolder: JournalNode = rootFolder;
-
-  lines.forEach((line, index) => {
-    currentDepth++;
-    if (isFolderLine(line) && currentDepth < maxDepth) {
-      const nextFolder = {
-        value: line,
-        tag: buildHeader(currentDepth + 1),
-        notes: [],
-        children: [],
-        parent: currentFolder,
-      };
-      currentFolder.children.push(nextFolder);
-      currentFolder = nextFolder;
-    } else {
-      const newNote = {
-        value: line,
-        tag: getNoteTag(line, currentDepth, maxDepth),
-        parent: currentFolder,
-      };
-      currentFolder.notes.push(newNote);
-      // prep next line processing
-      const nextLineIndex = index + 1;
-      // move up one if we are moving on to a new section
-      if (isUpOne(lines, nextLineIndex)) {
-        currentDepth--;
-      } else if (isNewStructure(lines, nextLineIndex)) {
-        currentDepth = 0;
-        currentFolder = rootFolder;
+  const chunks = input.split('\n\n');
+  const mainName = input.split('\n')[0];
+  let currentNode: JournalNode = {
+    value: mainName,
+    tag: 'h1',
+    notes: [],
+    children: [],
+  };
+  let sortValue = 1;
+  chunks.forEach((chunk) => {
+    const secondSplit = chunk.split('\n');
+    const firstLine = secondSplit[0];
+    secondSplit.forEach((line, index) => {
+      const title = firstLine.split('\n')[0];
+      if (title === line) {
+        if (isFolderLine(title)) {
+          if (currentNode) {
+            if (title !== '' && title !== undefined) {
+              rootNode.children.push(currentNode);
+              currentNode = newEntry(title, sortValue);
+              sortValue = sortValue + 1;
+            }
+          }
+        } else {
+          // this should be added to the current note
+          currentNode.notes.push({
+            value: line,
+            tag: 'p',
+          });
+        }
+      } else {
+        if (validTitle(secondSplit, index)) {
+          // find titles not cleanly separated by a double new line
+          rootNode.children.push(currentNode);
+          currentNode = newEntry(line, sortValue);
+          sortValue = sortValue + 1;
+        } else {
+          currentNode.notes.push({
+            value: line,
+            tag: 'p',
+          });
+        }
       }
-    }
+    });
   });
-  return rootFolder;
+  return rootNode;
 }

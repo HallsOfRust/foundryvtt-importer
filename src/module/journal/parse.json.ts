@@ -127,7 +127,7 @@ async function createFoldersRecursive(
 
   if (node.children) {
     const children = node.children.map((child) => {
-      return { ...child, sortValue: getSortValue(child.value) };
+      return { ...child, sortValue: child?.sortValue ?? getSortValue(child.value) };
     });
     for (const child of children) {
       await createFoldersRecursive(child, rootFolder, folder, currentDepth, settings);

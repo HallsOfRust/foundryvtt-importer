@@ -13,7 +13,7 @@ describe('notesToHTMLNote', () => {
       },
     ];
     const parsed = notesToHTMLNote(notes);
-    expect(parsed).toEqual('<p>this is the first part of the note this is the second part of the note</p>');
+    expect(parsed).toEqual('<p>this is the first part of the note</p><p>this is the second part of the note</p>');
   });
 
   it('should convert an unordered list', () => {

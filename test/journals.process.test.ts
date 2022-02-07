@@ -1,4 +1,4 @@
-import { buildStructure, guessDepth, isUpOne, parseToJournal } from '../src/module/journal/process';
+import { buildStructure, getNames, guessDepth, isUpOne } from '../src/module/journal/process';
 
 describe('guessDepth', () => {
   it('should return the depth of the journal', () => {
@@ -39,27 +39,10 @@ describe('Find location tests', () => {
   });
 });
 
-describe('parseToJournal', () => {
-  it('should parse lorem ipsum', () => {
-    const journalText =
-      'Main Title\nSection One\nFirst Note\nLorem Ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. \nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. \nExcepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\nSecond Note\nHello world this is a note to test whether a second note can be collected properly we shall see.\nSection Two\nFirst Note\nTest another chunk of text lets see if it can handle this, who knows. This is a note too though.';
-    const journal = parseToJournal(journalText);
-    expect(journal.value).toBe('Main Title');
-    expect(journal.children[0].value).toBe('Section One');
-    expect(journal.children[1].value).toBe('Section Two');
-    expect(journal.children.length).toBe(2);
-    expect(journal.children[0].children[0].value).toBe('First Note');
-    expect(journal.children[0].children[0].notes[0].value).toBe(
-      'Lorem Ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ',
-    );
-    expect(journal.children[0].children[0].notes[1].value).toBe(
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. ',
-    );
-    expect(journal.children[0].children[0].notes[2].value).toBe(
-      'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-    );
-    expect(journal.children[0].children[1].value).toBe('Second Note');
-    expect(journal.children[1].children[0].value).toBe('First Note');
-    expect(journal.children[0].children.length).toBe(2);
+describe('getNames', () => {
+  it('should get the names from double returns', () => {
+    const journalText = 'Main Title\n\nSection One\nSome content here\n\nSection Two\nsome more content';
+    const names = getNames(journalText);
+    expect(names).toEqual(['Main Title', 'Section One', 'Section Two']);
   });
 });

@@ -1,6 +1,6 @@
 import { UserData } from '../importForm';
 import { getRootName, journalFromJson, JournalNode } from './parse.json';
-import { parseToJournal } from './process';
+import { parseToJournalV2 } from './process';
 
 function forEachJournal(root: JournalNode, callback: (journal: JournalNode) => void) {
   callback(root);
@@ -18,7 +18,7 @@ function removeCircular(rootJournal: JournalNode) {
 }
 
 async function txtRoute(input: string) {
-  const rootJournal = parseToJournal(input);
+  const rootJournal = parseToJournalV2(input);
   removeCircular(rootJournal);
   console.log(`Journal: ${JSON.stringify(rootJournal, null, 2)}`);
   journalFromJson([rootJournal]);
