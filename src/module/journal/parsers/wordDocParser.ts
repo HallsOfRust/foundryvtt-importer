@@ -156,14 +156,16 @@ function parseName(input: string) {
 
 export function parseToJournalV2(input: string): JournalNode {
   const prefix = '';
+  const name = parseName(input);
+  const cleaned = input.replace(name, '').trim();
   const rootNode: JournalNode = {
-    value: parseName(input),
+    value: name,
     tag: 'h1',
     notes: [],
     children: [],
   };
-  const chunks = input.split('\n\n');
-  const mainName = input.split('\n')[0];
+  const chunks = cleaned.split('\n\n');
+  const mainName = cleaned.split('\n')[0];
   let currentNode: JournalNode = {
     value: mainName,
     tag: 'h1',
