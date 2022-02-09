@@ -1,6 +1,6 @@
 import { UserData } from '../importForm';
 import { getRootName, journalFromJson, JournalNode } from './parse.json';
-import { parseToJournalV2 } from './process';
+import { parseToJournalV2 } from './parsers/wordDocParser';
 
 function forEachJournal(root: JournalNode, callback: (journal: JournalNode) => void) {
   callback(root);

@@ -1,4 +1,4 @@
-import { JournalNode } from './parse.json';
+import { JournalNode } from '../parse.json';
 
 export interface ImportFolder {
   name: string;

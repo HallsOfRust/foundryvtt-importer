@@ -1,4 +1,4 @@
-import { buildStructure, getNames, guessDepth, isUpOne } from '../src/module/journal/process';
+import { buildStructure, getNames, guessDepth, isUpOne } from '../../../src/module/journal/parsers/wordDocParser';
 
 describe('guessDepth', () => {
   it('should return the depth of the journal', () => {
