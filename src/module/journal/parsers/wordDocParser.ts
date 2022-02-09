@@ -129,9 +129,9 @@ function getNoteTag(line: string, currentDepth: number, maxDepth: number): strin
   return 'p';
 }
 
-function newEntry(title: string, sortValue: number): JournalNode {
+function newEntry(title: string, sortValue: number, prefix?: string): JournalNode {
   return {
-    value: title,
+    value: `${prefix}${title}`,
     tag: 'h2',
     notes: [],
     children: [],
@@ -149,9 +149,15 @@ function validTitle(lines: string[], index: number): boolean {
   return noTilesBorder && !followedByBullet;
 }
 
+function parseName(input: string) {
+  const lines = input.split('\n');
+  return lines[0];
+}
+
 export function parseToJournalV2(input: string): JournalNode {
+  const prefix = '';
   const rootNode: JournalNode = {
-    value: 'Parsed Journal',
+    value: parseName(input),
     tag: 'h1',
     notes: [],
     children: [],
@@ -175,7 +181,7 @@ export function parseToJournalV2(input: string): JournalNode {
           if (currentNode) {
             if (title !== '' && title !== undefined) {
               rootNode.children.push(currentNode);
-              currentNode = newEntry(title, sortValue);
+              currentNode = newEntry(title, sortValue, prefix);
               sortValue = sortValue + 1;
             }
           }
@@ -190,7 +196,7 @@ export function parseToJournalV2(input: string): JournalNode {
         if (validTitle(secondSplit, index)) {
           // find titles not cleanly separated by a double new line
           rootNode.children.push(currentNode);
-          currentNode = newEntry(line, sortValue);
+          currentNode = newEntry(line, sortValue, prefix);
           sortValue = sortValue + 1;
         } else {
           currentNode.notes.push({
