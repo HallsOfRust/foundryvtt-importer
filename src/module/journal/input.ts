@@ -17,17 +17,17 @@ function removeCircular(rootJournal: JournalNode) {
   });
 }
 
-async function txtRoute(input: string) {
-  const rootJournal = parseToJournalV2(input);
+async function txtRoute(input: string, prefix?: string) {
+  const rootJournal = parseToJournalV2(input, prefix);
   removeCircular(rootJournal);
   console.log(`Journal: ${JSON.stringify(rootJournal, null, 2)}`);
   journalFromJson([rootJournal]);
 }
 
-export async function processInputJSON({ jsonfile, clipboardInput }: UserData) {
+export async function processInputJSON({ jsonfile, clipboardInput, prefix }: UserData) {
   if (clipboardInput) {
     console.log(`Clipboard input: ${clipboardInput}`);
-    txtRoute(clipboardInput);
+    txtRoute(clipboardInput, prefix);
     return;
   }
   const response = await fetch(jsonfile);

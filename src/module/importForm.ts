@@ -7,6 +7,7 @@ export interface HTMLImportData {
 export interface UserData {
   jsonfile: string;
   clipboardInput?: string;
+  prefix?: string;
 }
 
 export type Handler = (data: UserData) => Promise<void>;
