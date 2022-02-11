@@ -406,11 +406,9 @@ Foundry.
 ## Plans for future implementation
 
 - Import journals from markdown directories (such as Obsidian)
-- Actor importing is basic, want to add fine tuning for Items & add Spells
-- Make settings more configurable (to hide unused elements)
-- Make parsers more modular to allow for easy extensibility
-- Support for adding items/weapons/armor etc. Including from CSV.
+- For journal imports, create dynamic links between journal entries based on text matches
 - Export to compendium. I can see people using this to import work from larger datasets and wanting to share or add them to modules.
+
 
 ## Contributing to the codebase
 
