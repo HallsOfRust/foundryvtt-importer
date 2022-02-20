@@ -635,9 +635,13 @@ export function parseSensesWTC(lines: string[]): Senses {
       [text, special] = sense.split('(');
       senses.special = special.replace(')', '');
     }
-    // get number from string of form darkvision 60ft
-    const number = text.split(' ')[1].replace('ft', '');
-    const senseText = sense.split(' ')[0];
+    // get text and number from string of form darkvision 60ft
+    const contentMatch = text.match(/([\w ]+) (\d+)( ?ft\.?)?/);
+    if (!contentMatch || contentMatch.length < 3) {
+      throw new Error(`Could not parse sense from "${text}".`);
+    }
+    const senseText = contentMatch[1].toLowerCase();
+    const number = contentMatch[2];
     switch (senseText) {
       case 'darkvision':
         senses.darkvision = Number(number);
@@ -655,7 +659,7 @@ export function parseSensesWTC(lines: string[]): Senses {
         senses.passivePerception = Number(number);
         break;
       default:
-        break;
+        throw new Error(`Could not parse sense from "${text}".`);
     }
   });
   senses.units = 'ft';

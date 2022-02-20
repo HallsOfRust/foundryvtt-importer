@@ -151,7 +151,7 @@ describe('parseHealth', () => {
 describe('parseSenses', () => {
   it('should parse a valid senses string', () => {
     const senses = parseSensesWTC(['Senses darkvision 60 ft., passive Perception 17']);
-    expect(senses).toStrictEqual({ darkvision: 60, units: 'ft' });
+    expect(senses).toStrictEqual({ darkvision: 60, passivePerception: 17, units: 'ft' });
   });
   it('should throw an error when not passed a valid senses string', () => {
     const invalid = ['invalid'];
